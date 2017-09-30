@@ -8,3 +8,8 @@ target
 build
 foo-consumer-version
 
+*/target/*
+**/.settings
+**/.vscode
+**/.classpath
+**/.project

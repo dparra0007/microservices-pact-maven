@@ -1,0 +1,30 @@
+version: '3'
+services:
+  api:
+    build:
+      context: ./microservices-pact-provider
+    ports:
+      - 8080:8080
+
+  pactverifier:
+    image: dius/pact-provider-verifier-docker
+    links:
+      - api
+    depends_on: 
+      - api
+    volumes:
+      - ./microservices-pact-consumer/target/pacts:/tmp/pacts                 # If you have local Pacts
+    environment:
+    #  - pact_urls=http://pact-host:9292/pacts/provider/MyAPI/consumer/MyConsumer/latest
+      - pact_urls=/tmp/pacts/Foo_Consumer-Foo_Provider.json # If you have local Pacts
+      - provider_base_url=http://api:8080
+    command: >
+      sh -c "
+        while ! nc -z api 8080;
+        do
+          echo sleeping;
+          sleep 1;
+        done;
+        echo Connected!;
+        bundle exec rake verify_pacts
+      "
